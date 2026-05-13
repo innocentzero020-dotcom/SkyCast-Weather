@@ -1,109 +1,17 @@
-import base64
-from datetime import datetime
-from pathlib import Path
-
-import pycountry
-import requests
 import streamlit as st
+import requests
+import pycountry
+from datetime import datetime, timedelta
 
-# =========================================================
-# PAGE CONFIG
-# =========================================================
+# -------------------- Page Config --------------------
 st.set_page_config(
     page_title="SkyCast Weather",
     page_icon="🌤️",
     layout="centered"
 )
 
-# =========================================================
-# PATHS / CITY BACKGROUNDS
-# =========================================================
-ASSETS_DIR = Path("assets")
-
-CITY_BACKGROUNDS = {
-    "karachi": ASSETS_DIR / "karachi.jpg",
-    "lahore": ASSETS_DIR / "lahore.jpg",
-    "islamabad": ASSETS_DIR / "islamabad.jpg",
-    "peshawar": ASSETS_DIR / "peshawar.jpg",
-    "quetta": ASSETS_DIR / "quetta.jpg",
-    "multan": ASSETS_DIR / "multan.jpg",
-}
-
-DEFAULT_BACKGROUND = ASSETS_DIR / "default.jpg"
-
-
-def image_to_data_uri(image_path: Path) -> str | None:
-    """Convert local image to base64 data URI for CSS background."""
-    if not image_path.exists():
-        return None
-
-    ext = image_path.suffix.lower()
-    mime = "image/jpeg"
-    if ext == ".png":
-        mime = "image/png"
-    elif ext == ".webp":
-        mime = "image/webp"
-
-    with open(image_path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode("utf-8")
-
-    return f"data:{mime};base64,{encoded}"
-
-
-def get_background_for_city(city_name: str) -> str | None:
-    if not city_name:
-        return image_to_data_uri(DEFAULT_BACKGROUND)
-
-    city_lower = city_name.strip().lower()
-
-    for key, path in CITY_BACKGROUNDS.items():
-        if key in city_lower:
-            return image_to_data_uri(path)
-
-    return image_to_data_uri(DEFAULT_BACKGROUND)
-
-
-def get_country_name(country_code: str) -> str:
-    if not country_code:
-        return "Unknown"
-
-    country = pycountry.countries.get(alpha_2=country_code.upper())
-    return country.name if country else country_code.upper()
-
-
-def format_local_time(unix_ts: int, timezone_offset: int) -> str:
-    if not unix_ts:
-        return "N/A"
-    local_time = datetime.utcfromtimestamp(unix_ts + timezone_offset)
-    return local_time.strftime("%I:%M %p")
-
-
-def get_wind_direction(deg):
-    if deg is None:
-        return "N/A"
-    directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-    index = round(deg / 45) % 8
-    return directions[index]
-
-
-# =========================================================
-# INPUT
-# =========================================================
-city = st.text_input(
-    "Enter city name",
-    placeholder="e.g. Karachi or Karachi, PK"
-)
-
-bg_image = get_background_for_city(city)
-
-# =========================================================
-# CUSTOM CSS
-# =========================================================
-bg_css = ""
-if bg_image:
-    bg_css = f'url("{bg_image}")'
-else:
-    bg_css = 'none'
+# -------------------- Custom CSS --------------------
+bg_image_url = "https://images.unsplash.com/photo-1592210454359-9043f067919b?q=80&w=1920&auto=format&fit=crop"
 
 st.markdown(
     f"""
@@ -111,16 +19,57 @@ st.markdown(
     [data-testid="stAppViewContainer"] {{
         background-image:
             linear-gradient(rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.72)),
-            {bg_css};
+            url("{bg_image_url}");
         background-size: cover;
         background-position: center;
-        background-repeat: no-repeat;
         background-attachment: fixed;
     }}
 
-    [data-testid="stHeader"],
-    [data-testid="stMainViewContainer"] {{
+    [data-testid="stHeader"], [data-testid="stMainViewContainer"] {{
         background-color: transparent !important;
+    }}
+
+    .hero-card {{
+        background: rgba(255, 255, 255, 0.10);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+        color: white;
+        text-align: center;
+        margin-bottom: 18px;
+    }}
+
+    .info-card {{
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+        color: white;
+        text-align: center;
+        height: 100%;
+    }}
+
+    .metric-label {{
+        font-size: 14px;
+        opacity: 0.85;
+        margin-bottom: 6px;
+    }}
+
+    .metric-value {{
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.2;
+    }}
+
+    .subtle {{
+        opacity: 0.8;
+        font-size: 14px;
     }}
 
     .stTextInput label {{
@@ -129,47 +78,70 @@ st.markdown(
     }}
 
     .stTextInput input {{
-        background: rgba(255,255,255,0.12) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
         color: white !important;
         border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.25) !important;
+        border: 1px solid rgba(255, 255, 255, 0.28) !important;
     }}
 
     .stButton > button {{
         width: 100%;
-        background: rgba(255,255,255,0.18);
-        color: white;
         border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.25);
-        padding: 0.75rem 1rem;
-        font-weight: bold;
-        font-size: 16px;
+        background: rgba(255, 255, 255, 0.18);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        font-weight: 700;
+        padding: 0.65rem 1rem;
     }}
 
-    h1, h2, h3, p, span, label {{
+    h1, h2, h3, p, span, .stMarkdown {{
         color: white !important;
     }}
-
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# =========================================================
-# HEADER
-# =========================================================
-st.markdown("# 🌤️ SkyCast Weather")
-st.markdown("Professional live weather insights from around the world")
+# -------------------- Helpers --------------------
+def get_country_name(country_code: str) -> str:
+    if not country_code:
+        return "Unknown"
+    country = pycountry.countries.get(alpha_2=country_code.upper())
+    return country.name if country else country_code.upper()
 
-# =========================================================
-# API KEY
-# =========================================================
+def format_local_time(unix_ts: int, timezone_offset: int) -> str:
+    if not unix_ts:
+        return "N/A"
+    local_dt = datetime.utcfromtimestamp(unix_ts + timezone_offset)
+    return local_dt.strftime("%I:%M %p")
+
+def wind_direction(deg):
+    if deg is None:
+        return "N/A"
+    directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
+    index = round(deg / 45) % 8
+    return directions[index]
+
+# -------------------- Header --------------------
+st.markdown("<h1 style='text-align:center;'>🌤️ SkyCast Weather</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='text-align:center;'>Live weather updates with detailed insights from around the world</p>",
+    unsafe_allow_html=True
+)
+
+# -------------------- Input --------------------
+with st.form("weather_form"):
+    city = st.text_input(
+        "Enter city name",
+        placeholder="e.g. Karachi or Karachi, PK"
+    )
+    submitted = st.form_submit_button("Get Weather")
+
+# -------------------- API Key --------------------
 api_key = st.secrets["OPENWEATHER_API_KEY"]
 
-# =========================================================
-# MAIN ACTION
-# =========================================================
-if st.button("Get Weather"):
+# -------------------- Main Logic --------------------
+if submitted:
     if not city.strip():
         st.warning("Please enter a city name first! 😊")
     else:
@@ -186,7 +158,7 @@ if st.button("Get Weather"):
                 data = response.json()
 
             if response.status_code == 200:
-                # Weather
+                # Core data
                 temp = data["main"]["temp"]
                 feels_like = data["main"]["feels_like"]
                 temp_min = data["main"]["temp_min"]
@@ -197,67 +169,126 @@ if st.button("Get Weather"):
                 clouds = data.get("clouds", {}).get("all", 0)
                 wind_speed = data.get("wind", {}).get("speed", 0)
                 wind_deg = data.get("wind", {}).get("deg")
-                description = data["weather"][0]["description"].capitalize()
+                desc = data["weather"][0]["description"].capitalize()
                 icon = data["weather"][0]["icon"]
 
-                # Location
+                # Location data
                 city_name = data.get("name", "Unknown City")
                 country_code = data.get("sys", {}).get("country", "")
                 country_name = get_country_name(country_code)
 
-                # Time
+                # Time data
                 timezone_offset = data.get("timezone", 0)
-                sunrise = format_local_time(data["sys"]["sunrise"], timezone_offset)
-                sunset = format_local_time(data["sys"]["sunset"], timezone_offset)
-                local_time = datetime.utcfromtimestamp(
-                    datetime.utcnow().timestamp() + timezone_offset
-                ).strftime("%I:%M %p")
+                sunrise = format_local_time(data.get("sys", {}).get("sunrise"), timezone_offset)
+                sunset = format_local_time(data.get("sys", {}).get("sunset"), timezone_offset)
+                local_time = datetime.utcfromtimestamp(datetime.utcnow().timestamp() + timezone_offset).strftime("%I:%M %p")
 
                 # Coordinates
                 lat = data.get("coord", {}).get("lat", "N/A")
                 lon = data.get("coord", {}).get("lon", "N/A")
 
-                # =====================================================
-                # HERO SECTION
-                # =====================================================
-                col1, col2 = st.columns([1, 2])
+                # -------------------- Hero Card --------------------
+                st.markdown(f"""
+                <div class="hero-card">
+                    <h2 style="margin:0; font-size: 32px;">📍 {city_name}, {country_name}</h2>
+                    <p class="subtle" style="margin-top: 8px;">{desc}</p>
+                    <img src="https://openweathermap.org/img/wn/{icon}@4x.png" width="150">
+                    <h1 style="font-size: 64px; margin: 0;">{temp}°C</h1>
+                    <p style="font-size: 18px; margin-top: 8px;">
+                        Feels like <b>{feels_like}°C</b> · High <b>{temp_max}°C</b> · Low <b>{temp_min}°C</b>
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # -------------------- Main Details --------------------
+                col1, col2 = st.columns(2)
 
                 with col1:
-                    st.image(
-                        f"https://openweathermap.org/img/wn/{icon}@4x.png",
-                        width=160
-                    )
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Humidity</div>
+                        <div class="metric-value">{humidity}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
                 with col2:
-                    st.subheader(f"📍 {city_name}, {country_name}")
-                    st.markdown(f"**{description}**")
-                    st.markdown(f"## {temp}°C")
-                    st.markdown(f"Feels like **{feels_like}°C**")
-                    st.caption(f"High: {temp_max}°C • Low: {temp_min}°C")
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Wind</div>
+                        <div class="metric-value">{wind_speed} m/s</div>
+                        <div class="subtle">Direction: {wind_direction(wind_deg)}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                st.markdown("---")
+                st.markdown("<br>", unsafe_allow_html=True)
 
-                # =====================================================
-                # STATS
-                # =====================================================
-                row1 = st.columns(2)
-                row1[0].metric("Humidity", f"{humidity}%")
-                row1[1].metric("Wind Speed", f"{wind_speed} m/s", help=f"Direction: {get_wind_direction(wind_deg)}")
+                col3, col4 = st.columns(2)
 
-                row2 = st.columns(2)
-                row2[0].metric("Pressure", f"{pressure} hPa")
-                row2[1].metric("Visibility", f"{visibility_km:.1f} km")
+                with col3:
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Pressure</div>
+                        <div class="metric-value">{pressure} hPa</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
-                row3 = st.columns(2)
-                row3[0].metric("Cloudiness", f"{clouds}%")
-                row3[1].metric("Local Time", local_time)
+                with col4:
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Visibility</div>
+                        <div class="metric-value">{visibility_km:.1f} km</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                col5, col6 = st.columns(2)
+
+                with col5:
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Cloudiness</div>
+                        <div class="metric-value">{clouds}%</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with col6:
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Local Time</div>
+                        <div class="metric-value">{local_time}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                st.markdown("<br>", unsafe_allow_html=True)
+
+                # -------------------- Extra Info --------------------
                 st.markdown("### Additional Information")
+                extra_col1, extra_col2, extra_col3 = st.columns(3)
 
-                row4 = st.columns(3)
-                row4[0].metric("Sunrise", sunrise)
-                row4[1].metric("Sunset", sunset)
-                row4[2].metric("Coordinates", f"{lat}, {lon}")
+                with extra_col1:
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Sunrise</div>
+                        <div class="metric-value">{sunrise}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with extra_col2:
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Sunset</div>
+                        <div class="metric-value">{sunset}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                with extra_col3:
+                    st.markdown(f"""
+                    <div class="info-card">
+                        <div class="metric-label">Coordinates</div>
+                        <div class="metric-value">{lat}, {lon}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
             else:
                 message = data.get("message", "City not found")
@@ -268,8 +299,6 @@ if st.button("Get Weather"):
         except Exception as e:
             st.error(f"Something went wrong: {e}")
 
-# =========================================================
-# FOOTER
-# =========================================================
-st.markdown("---")
+# -------------------- Footer --------------------
+st.markdown("<br><hr>", unsafe_allow_html=True)
 st.caption(f"Last updated: {datetime.now().strftime('%d %b, %Y | %I:%M %p')}")
