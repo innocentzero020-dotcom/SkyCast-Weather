@@ -113,7 +113,6 @@ if st.button("Mausam Maloom Karein"):
                     st.markdown(f"<div class='glass-card'>🌡️<br><b>Pressure</b><br>{data['main']['pressure']}</div>", unsafe_allow_html=True)
 
                 st.markdown(f"<div class='glass-card'>🌅 Sunrise: {sunrise} | 🌇 Sunset: {sunset}</div>", unsafe_allow_html=True)
-                st.balloons()
 
             else:
                 st.error("Shehar nahi mila. Spelling check karein!")
