@@ -15,8 +15,8 @@ st.markdown("""
         background-attachment: fixed;
     }
     .stApp {
-        background: rgba(0, 0, 0, ;0.3/* Background ko thoda dark karne ke liye */
-    
+        background: rgba(0, 0, 0, 0.3); /* Background ko thoda dark karne ke liye */
+    }
     .glass-card {
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(15px);
