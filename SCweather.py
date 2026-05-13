@@ -5,33 +5,59 @@ from datetime import datetime
 # --- Page Configuration ---
 st.set_page_config(page_title="SkyCast Weather", page_icon="🌤️", layout="centered")
 
-# --- Custom CSS for Styling ---
+# --- Custom CSS for "Liquid Glass" Look ---
+# Yeh CSS wahi glassmorphism effect degi jo React component mein tha
 st.markdown("""
     <style>
     .main {
-        background-color: #f0f2f6;
+        background: url("https://images.unsplash.com/photo-1513002749550-c59d786b8e6c?q=80&w=1920&auto=format&fit=crop");
+        background-size: cover;
+        background-attachment: fixed;
+    }
+    .stApp {
+        background: rgba(0, 0, 0, 0.3); /* Background ko thoda dark karne ke liye */
+    }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        padding: 25px;
+        color: white;
+        margin-bottom: 20px;
+        text-align: center;
     }
     .stButton>button {
         width: 100%;
-        border-radius: 20px;
-        background-color: #007bff;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
         color: white;
-        height: 3em;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(5px);
         font-weight: bold;
+        transition: 0.3s;
     }
-    .weather-card {
-        padding: 20px;
-        border-radius: 15px;
-        background-color: white;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-        text-align: center;
+    .stButton>button:hover {
+        background: rgba(255, 255, 255, 0.4);
+        border: 1px solid white;
+    }
+    h1, p, span, label {
+        color: white !important;
+    }
+    .stTextInput>div>div>input {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- Header ---
-st.title("🌤️ SkyCast Weather")
-st.write("Duniya bhar ke mausam ki live updates")
+st.markdown("<h1 style='text-align: center;'>🌤️ SkyCast Weather</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Duniya bhar ke mausam ki live updates</p>", unsafe_allow_html=True)
 
 # --- Sidebar (Settings) ---
 st.sidebar.header("Settings")
@@ -39,7 +65,7 @@ unit = st.sidebar.selectbox("Temperature Unit", ["Celsius", "Fahrenheit"])
 u_param = "metric" if unit == "Celsius" else "imperial"
 
 # --- Input Area ---
-city = st.text_input("Shehar ka naam likhein:", placeholder="e.g. Karachi, Baldia Town, London")
+city = st.text_input("Shehar ka naam likhein:", placeholder="e.g. Karachi, London")
 api_key = st.secrets["OPENWEATHER_API_KEY"]
 
 if st.button("Mausam Maloom Karein"):
@@ -63,34 +89,30 @@ if st.button("Mausam Maloom Karein"):
                 desc = data['weather'][0]['description'].capitalize()
                 icon = data['weather'][0]['icon']
                 
-                # Convert Sunrise/Sunset
                 sunrise = datetime.fromtimestamp(data['sys']['sunrise']).strftime('%I:%M %p')
                 sunset = datetime.fromtimestamp(data['sys']['sunset']).strftime('%I:%M %p')
 
-                # --- Display Results ---
-                st.markdown(f"### 📍 {data['name']}, {data['sys']['country']}")
-                
-                # Main Card
-                col_main1, col_main2 = st.columns(2)
-                with col_main1:
-                    st.image(f"http://openweathermap.org/img/wn/{icon}@4x.png")
-                with col_main2:
-                    st.header(f"{temp}°{'C' if unit=='Celsius' else 'F'}")
-                    st.write(f"**{desc}**")
-                    st.write(f"Feels like: {feels_like}°")
+                # --- Display Results in Glass Cards ---
+                st.markdown(f"""
+                <div class="glass-card">
+                    <h2 style='margin:0;'>📍 {data['name']}, {data['sys']['country']}</h2>
+                    <img src="http://openweathermap.org/img/wn/{icon}@4x.png" width="150">
+                    <h1 style='font-size: 60px; margin:0;'>{temp}°{'C' if unit=='Celsius' else 'F'}</h1>
+                    <p style='font-size: 20px;'><b>{desc}</b></p>
+                    <p>Feels like: {feels_like}°</p>
+                </div>
+                """, unsafe_allow_html=True)
 
-                st.divider()
-
-                # Stats Columns
+                # Stats Row
                 col1, col2, col3 = st.columns(3)
-                col1.metric("Nami (Humidity)", f"{humidity}%")
-                col2.metric("Hawa (Wind)", f"{wind} m/s")
-                col3.metric("Pressure", f"{data['main']['pressure']} hPa")
+                with col1:
+                    st.markdown(f"<div class='glass-card'>💧<br><b>Nami</b><br>{humidity}%</div>", unsafe_allow_html=True)
+                with col2:
+                    st.markdown(f"<div class='glass-card'>💨<br><b>Hawa</b><br>{wind} m/s</div>", unsafe_allow_html=True)
+                with col3:
+                    st.markdown(f"<div class='glass-card'>🌡️<br><b>Pressure</b><br>{data['main']['pressure']}</div>", unsafe_allow_html=True)
 
-                # Sun Info
-                st.info(f"🌅 **Sunrise:** {sunrise} | 🌇 **Sunset:** {sunset}")
-
-                # Success Message
+                st.markdown(f"<div class='glass-card'>🌅 Sunrise: {sunrise} | 🌇 Sunset: {sunset}</div>", unsafe_allow_html=True)
                 st.balloons()
 
             else:
@@ -100,5 +122,5 @@ if st.button("Mausam Maloom Karein"):
             st.error("Internet connection ka masla hai.")
 
 # --- Footer ---
-st.markdown("---")
+st.markdown("<br><hr>", unsafe_allow_html=True)
 st.caption(f"Last updated: {datetime.now().strftime('%d %b, %Y | %I:%M %p')}")
