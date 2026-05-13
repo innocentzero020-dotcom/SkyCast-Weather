@@ -79,7 +79,7 @@ st.markdown(
 
     .stTextInput input {{
         background: rgba(255, 255, 255, 0.12) !important;
-        color: white !important;
+        color: black !important;
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.28) !important;
     }}
