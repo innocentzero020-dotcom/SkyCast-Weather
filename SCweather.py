@@ -7,7 +7,7 @@ st.set_page_config(page_title="SkyCast Weather", page_icon="🌤️", layout="ce
 
 # --- Custom CSS & Video Background ---
 # Maine ek cloud video ka link dala hai, aap isay badal bhi sakte hain
-video_url = "https://www.pexels.com/download/video/33637601/.mp4"
+video_url = "https://assets.mixkit.co/videos/preview/mixkit-clouds-moving-fast-in-the-sky-31215-large.mp4"
 
 st.markdown(f"""
     <style>
