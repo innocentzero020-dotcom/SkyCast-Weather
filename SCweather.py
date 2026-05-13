@@ -5,110 +5,118 @@ from datetime import datetime
 # --- Page Configuration ---
 st.set_page_config(page_title="SkyCast Weather", page_icon="🌤️", layout="centered")
 
-# --- Mobile Optimized Video Background ---
-video_url = "https://static.videezy.com/system/resources/previews/000/042/301/original/Clouds_6_-_15s_-_4k_res.mp4"
+# --- Custom CSS for Image Background ---
+# Maine ek behtareen clouds wali image select ki hai (Unsplash se)
+bg_image_url = "https://images.unsplash.com/photo-1592210454359-9043f067919b?q=80&w=1920&auto=format&fit=crop"
 
 st.markdown(f"""
     <style>
-    /* 1. Sab layers ko transparent karein taake video nazar aaye */
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stMainViewContainer"] {{
+    /* 1. Pure app structure par background image aur darkness overlay set karein */
+    [data-testid="stAppViewContainer"] {{
+        background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                          url("{bg_image_url}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed; /* Background ko stick rakhta hai */
+    }}
+
+    /* 2. Streamlit ke internal containers ko transparent karein mobile ke liye */
+    [data-testid="stHeader"], [data-testid="stMainViewContainer"] {{
         background-color: transparent !important;
     }}
 
-    /* 2. Video ki fixed position */
-    #myVideo {{
-        position: fixed;
-        right: 0;
-        bottom: 0;
-        min-width: 100%;
-        min-height: 100%;
-        z-index: -2;
-        object-fit: cover;
-    }}
-
-    /* 3. Overlay Darkness (0.7) */
-    .overlay {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: -1;
-    }}
-
-    /* 4. Glass Cards (Mobile Responsive) */
+    /* 3. Glass Cards Styling (Same as before) */
     .glass-card {{
         background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
         border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        padding: 25px;
         color: white;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
         text-align: center;
-        width: 100%;
     }}
 
-    /* Input box aur button ko behtar dikhane ke liye */
+    /* Input elements style update for image background */
     .stTextInput input {{
         background: rgba(255, 255, 255, 0.1) !important;
         color: white !important;
+        border-radius: 10px;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    ```
+    ```
+    }}
+    .stTextInput label {{
+        color: white !important;
     }}
 
-    h1, h2, h3, p, span, label {{
+    .stButton>button {{
+        width: 100%;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-weight: bold;
+    }}
+
+    /* Text color fixes */
+    h1, h2, h3, p, span, .stMarkdown {{
         color: white !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }}
     </style>
-
-    <video autoplay muted loop playsinline id="myVideo">
-        <source src="{video_url}" type="video/mp4">
-    </video>
-    <div class="overlay"></div>
     """, unsafe_allow_html=True)
 
-# --- App Content ---
-st.markdown("<h1 style='text-align: center; margin-bottom: 0;'>🌤️ SkyCast</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; opacity: 0.8;'>Live Weather Updates</p>", unsafe_allow_html=True)
+# --- Header ---
+st.markdown("<h1 style='text-align: center;'>🌤️ SkyCast Weather</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Duniya bhar ke mausam ki live updates</p>", unsafe_allow_html=True)
 
-# Input
-city = st.text_input("", placeholder="Enter city name (e.g. Karachi)")
+# --- Input Area ---
+city = st.text_input("Shehar ka naam likhein:", placeholder="e.g. Karachi, London")
 api_key = st.secrets["OPENWEATHER_API_KEY"]
 
 if st.button("Mausam Maloom Karein"):
-    if city:
+    if not city:
+        st.warning("Pehle shehar ka naam toh likhein! 😊")
+    else:
         url = "http://api.openweathermap.org/data/2.5/weather"
         params = {'q': city, 'appid': api_key, 'units': 'metric'}
-        
+
         try:
-            response = requests.get(url, params=params)
-            data = response.json()
-            
+            with st.spinner('Data aa raha hai...'):
+                response = requests.get(url, params=params)
+                data = response.json()
+
             if response.status_code == 200:
+                # Data Extraction
                 temp = data['main']['temp']
                 desc = data['weather'][0]['description'].capitalize()
                 icon = data['weather'][0]['icon']
                 
-                # Main Result Card
+                # --- Results (Glass Card) ---
                 st.markdown(f"""
                 <div class="glass-card">
                     <h2 style='margin:0;'>📍 {data['name']}</h2>
-                    <img src="http://openweathermap.org/img/wn/{icon}@4x.png" width="100">
-                    <h1 style='font-size: 50px; margin:0;'>{temp}°C</h1>
-                    <p>{desc}</p>
+                    <img src="http://openweathermap.org/img/wn/{icon}@4x.png" width="150">
+                    <h1 style='font-size: 60px; margin:0;'>{temp}°C</h1>
+                    <p style='font-size: 20px;'><b>{desc}</b></p>
                 </div>
                 """, unsafe_allow_html=True)
-                
-                # Secondary Stats
-                c1, c2 = st.columns(2)
-                with c1:
+
+                # Small Stats Cards
+                col1, col2 = st.columns(2)
+                with col1:
                     st.markdown(f"<div class='glass-card'>💧 Humidity<br>{data['main']['humidity']}%</div>", unsafe_allow_html=True)
-                with c2:
+                with col2:
                     st.markdown(f"<div class='glass-card'>💨 Wind<br>{data['wind']['speed']} m/s</div>", unsafe_allow_html=True)
+
             else:
-                st.error("Shehar nahi mila!")
+                st.error("Shehar nahi mila. Spelling check karein!")
+
         except:
-            st.error("Connection error!")
+            st.error("Internet connection ka masla hai.")
+
+# --- Footer ---
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.caption(f"Last updated: {datetime.now().strftime('%d %b, %Y | %I:%M %p')}")
