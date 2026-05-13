@@ -7,7 +7,7 @@ st.set_page_config(page_title="SkyCast Weather", page_icon="🌤️", layout="ce
 
 # --- Custom CSS for Image Background ---
 # Maine ek behtareen clouds wali image select ki hai (Unsplash se)
-bg_image_url = "https://images.unsplash.com/photo-1592210454359-9043f067919b?q=80&w=1920&auto=format&fit=crop"
+bg_image_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920"
 
 st.markdown(f"""
     <style>
