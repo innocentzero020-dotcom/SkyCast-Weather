@@ -7,35 +7,64 @@ st.set_page_config(page_title="SkyCast Weather", page_icon="🌤️", layout="ce
 
 # --- Custom CSS for Image Background ---
 # Maine ek behtareen clouds wali image select ki hai (Unsplash se)
-bg_image_url = "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1920"
+bg_image_url = "https://images.unsplash.com/photo-1592210454359-9043f067919b?q=80&w=1920&auto=format&fit=crop"
 
-# --- CSS Update for Input Visibility ---
-st.markdown("""
+st.markdown(f"""
     <style>
-    /* Input box ke andar ka text (Jo user type karega) */
-    .stTextInput input {
-        color: #FFFFFF !important; /* Likhaai ka rang bilkul safaid */
-        background: rgba(255, 255, 255, 0.2) !important; /* Box thoda sa transparent white */
-        caret-color: white !important; /* Cursor ka rang */
-    }
+    /* 1. Pure app structure par background image aur darkness overlay set karein */
+    [data-testid="stAppViewContainer"] {{
+        background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                          url("{bg_image_url}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed; /* Background ko stick rakhta hai */
+    }}
 
-    /* Placeholder text ka rang (e.g. "Enter city name") */
-    .stTextInput input::placeholder {
-        color: rgba(255, 255, 255, 0.6) !important; /* Halka safaid taake farq nazar aaye */
-    }
+    /* 2. Streamlit ke internal containers ko transparent karein mobile ke liye */
+    [data-testid="stHeader"], [data-testid="stMainViewContainer"] {{
+        background-color: transparent !important;
+    }}
 
-    /* Input box ke upar ka label (Shehar ka naam likhein) */
-    .stTextInput label {
+    /* 3. Glass Cards Styling (Same as before) */
+    .glass-card {{
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        padding: 25px;
+        color: white;
+        margin-bottom: 20px;
+        text-align: center;
+    }}
+
+    /* Input elements style update for image background */
+    .stTextInput input {{
+        background: rgba(255, 255, 255, 0.1) !important;
         color: white !important;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    ```
+    ```
+    }}
+    .stTextInput label {{
+        color: white !important;
+    }}
+
+    .stButton>button {{
+        width: 100%;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
         font-weight: bold;
-        text-shadow: 1px 1px 2px black; /* Label ke piche halka sa saya taake saaf dikhe */
-    }
-    
-    /* Input box focus hone par border ka rang */
-    .stTextInput input:focus {
-        border: 1px solid #007bff !important;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5) !important;
-    }
+    }}
+
+    /* Text color fixes */
+    h1, h2, h3, p, span, .stMarkdown {{
+        color: white !important;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
