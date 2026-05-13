@@ -13,7 +13,7 @@ st.markdown(f"""
     <style>
     /* 1. Pure app structure par background image aur darkness overlay set karein */
     [data-testid="stAppViewContainer"] {{
-        background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+        background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
                           url("{bg_image_url}");
         background-size: cover;
         background-position: center;
