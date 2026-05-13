@@ -49,7 +49,7 @@ st.markdown(f"""
     ```
     }}
     .stTextInput label {{
-        color: white !important;
+        color: black!important;
     }}
 
     .stButton>button {{
