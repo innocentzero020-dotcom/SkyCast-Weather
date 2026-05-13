@@ -88,9 +88,10 @@ st.markdown(
         width: 100%;
         border-radius: 12px;
         background: rgba(255, 255, 255, 0.18);
-        color: black;
+        color: white;
         border: 1px solid rgba(255, 255, 255, 0.28);
         font-weight: 700;
+        font-colour: black;
         padding: 0.65rem 1rem;
     }}
 
