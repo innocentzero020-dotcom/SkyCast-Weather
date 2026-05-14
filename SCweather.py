@@ -49,7 +49,7 @@ st.markdown(
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 18px;
         padding: 18px;
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.20);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
         color: white;
         text-align: center;
         height: 100%;
@@ -79,7 +79,7 @@ st.markdown(
 
     .stTextInput input {{
         background: rgba(255, 255, 255, 0.12) !important;
-        color: white !important;
+        color: black !important;
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.28) !important;
     }}
@@ -88,7 +88,7 @@ st.markdown(
         width: 100%;
         border-radius: 12px;
         background: rgba(255, 255, 255, 0.18);
-        color: white;
+        color: black;
         border: 1px solid rgba(255, 255, 255, 0.28);
         font-weight: 700;
         padding: 0.65rem 1rem;
@@ -133,7 +133,7 @@ st.markdown(
 with st.form("weather_form"):
     city = st.text_input(
         "Enter city name",
-        placeholder="e.g. Karachi or Karachi, PK"
+        placeholder="e.g. Karachi or london"
     )
     submitted = st.form_submit_button("Get Weather")
 
